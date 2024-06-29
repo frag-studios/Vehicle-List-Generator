@@ -12,43 +12,24 @@ if not exist "%inputFile%" (
     exit /b 1
 )
 
-REM -- Check if output file exists, if not create it
-if not exist "%outputFile%" (
-    echo -- Vehicles list > "%outputFile%"
-    echo return { >> "%outputFile%"
-) else (
-    REM If output file exists, clear its contents before appending new data
-    echo -- Vehicles list > "%outputFile%"
-    echo return { >> "%outputFile%"
-)
+REM -- Clear output file or create it if it doesn't exist
+echo -- Vehicles list > "%outputFile%"
+echo return { >> "%outputFile%"
 
 echo Processing vehicles...
-timeout /t 1 >nul
 
 REM -- Start appending to the Lua file
-set "firstEntry=true"
 for /f "tokens=*" %%i in (%inputFile%) do (
     set "model=%%i"
-    set "name=%%i"
-    set "brand=Unknown" REM Default brand, modify as needed
-    set "price=10000" REM Default price, modify as needed
-    set "category=compacts" REM Default category, modify as needed
-    set "type=automobile" REM Default type, modify as needed
-    set "shop=pdm" REM Default shop, modify as needed
+    set "name=!model:~0,1!!model:~1!"
+    set "defaultPrice=1000000000"
+    set "defaultExtraField="
+    
     REM -- Output the current vehicle being processed
     echo Adding vehicle: model=!model!, name=!name!
+    
     REM -- Append the new vehicle entry to the Lua file
-    (
-    echo     {
-    echo         model = '!model!',
-    echo         name = '!name!',
-    echo         brand = '!brand!',
-    echo         price = !price!,
-    echo         category = '!category!',
-    echo         type = '!type!',
-    echo         shop = '!shop!',
-    echo     },
-    ) >> "%outputFile%"
+    echo     ["!model!"] = {"!name!", !defaultPrice!, "!defaultExtraField!"}, >> "%outputFile%"
 )
 
 echo } >> "%outputFile%"
